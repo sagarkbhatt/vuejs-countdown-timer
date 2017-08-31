@@ -1,137 +1,148 @@
 <template>
-    <div v-if="loaded === 'true'">
-        <span class="icon-clock" v-if="infinite === 'true'">N/A</span>
-        <span class="icon-clock" v-else-if="runTimer === 'false'">Expired</span>
-        <span class="icon-clock" v-else>{{ twoDigits( days ) }} DAY {{ twoDigits( hours ) }}:{{ twoDigits( minutes ) }}:{{ twoDigits( seconds ) }}</span>
-    </div>
+	<div v-if="loaded === 'true'">
+		<span class="icon-clock" v-if="infinite === 'true'">N/A</span>
+		<span class="icon-clock" v-else-if="runTimer === 'false'">Expired</span>
+		<span class="icon-clock" v-else>{{ twoDigits( days ) }} DAY {{ twoDigits( hours ) }}:{{ twoDigits( minutes ) }}:{{ twoDigits( seconds ) }}</span>
+	</div>
 </template>
 
 <script>
 
-    export default {
-        props: [ 'deadline', 'timezone' ],
+	export default {
+		props: [ 'deadline', 'timezone' ],
 
-        data() {
-            return {
-                // getTime() returns number of milliseconds since given date.
-                // convert milliseconds to seconds.
-                now     : null,
-                date    : null,
-                timer   : null,
-                diffSec : null,
-                diffMin : null,
-                diffHour: null,
-                diffDay : null,
-                runTimer: 'true',
-                infinite: 'false',
-                loaded  : 'false',
-            }
-        },
+		data() {
+			return {
+				// getTime() returns number of milliseconds since given date.
+				// convert milliseconds to seconds.
+				now     : null,
+				date    : null,
+				timer   : null,
+				diffSec : null,
+				diffMin : null,
+				diffHour: null,
+				diffDay : null,
+				runTimer: 'true',
+				infinite: 'false',
+				loaded  : 'false',
+			}
+		},
 
-        mounted() {
+		mounted() {
 
-            let vm   = this;
+			let vm   = this;
 
-            let parseDate = Date.parse( vm.deadline );
+			let parseDate = Date.parse( vm.deadline );
 
-            if( isNaN( parseDate ) ) {
+			if( isNaN( parseDate ) ) {
 
-                vm.infinite = 'true';
-                vm.loaded = 'true';
+				vm.infinite = 'true';
+				vm.loaded = 'true';
 
-            } else {
+			} else {
 
-                vm.date  = Math.trunc( parseDate / 1000 );
+				vm.date  = Math.trunc( parseDate / 1000 );
 
-                vm.timer = setInterval( () => {
+				vm.timer = setInterval( () => {
 
-                    vm.runTimer = 'true';
+					vm.runTimer = 'true';
 
-                let timeZoneLocale = new Date().toLocaleString( 'en-US', { timeZone: vm.timezone } );
-                vm.now = Math.trunc( ( new Date( timeZoneLocale ) ).getTime() / 1000 );
+					let timeZoneLocale = new Date();
+					vm.now = Math.trunc( timeZoneLocale.getTime() / 1000 );
 
-                vm.loaded = 'true';
+					if ( vm.timezone ) {
 
-            }, 1000 )
+						timeZoneLocale = new Date().toLocaleString( 'en-US', { timeZone: vm.timezone } );
+						vm.now = Math.trunc( ( new Date( timeZoneLocale ) ).getTime() / 1000 );
+					}
 
-            }
-        },
+					vm.loaded = 'true';
 
-        methods: {
-            stopTimer: function () {
+				}, 1000 )
 
-                let vm = this;
-                clearInterval( vm.timer );
-                vm.runTimer = 'false';
+			}
+		},
 
-            },
-            twoDigits: function ( val ) {
+		methods: {
 
-                if ( value.toString().length <= 1 ) {
-                    return '0' + value.toString();
-                }
+			stopTimer: function () {
 
-                return value.toString();
-            }
-        },
+				let vm = this;
+				clearInterval( vm.timer );
+				vm.runTimer = 'false';
 
-        computed: {
-            seconds() {
+			},
+			twoDigits: function ( value ) {
 
-                let vm     = this;
-                vm.diffSec = Math.trunc( vm.date - vm.now ) % 60;
+				if ( value.toString().length <= 1 ) {
+					return '0' + value.toString();
+				}
 
-                if( vm.diffSec < 0 ) {
+				return value.toString();
+			}
 
-                    vm.diffSec  = 0;
-                    vm.stopTimer();
+		},
 
-                }
+		computed: {
 
-                return vm.diffSec;
+			seconds() {
 
-            },
+				let vm     = this;
+				vm.diffSec = Math.trunc( vm.date - vm.now ) % 60;
 
-            minutes() {
+				if( vm.diffSec < 0 ) {
 
-                let vm     = this;
-                vm.diffMin = Math.trunc( ( vm.date - vm.now ) / 60 ) % 60;
+					vm.diffSec  = 0;
+					vm.stopTimer();
 
-                if( vm.diffMin < 0 ) {
+				}
 
-                    vm.diffMin  = 0;
+				return vm.diffSec;
 
-                }
+			},
 
-                return vm.diffMin;
+			minutes() {
 
-            },
+				let vm     = this;
+				vm.diffMin = Math.trunc( ( vm.date - vm.now ) / 60 ) % 60;
 
-            hours() {
+				if( vm.diffMin < 0 ) {
 
-                let vm      = this;
-                vm.diffHour = Math.trunc( ( vm.date - vm.now ) / 60 / 60 ) % 24;
+					vm.diffMin  = 0;
 
-                if( vm.diffHour < 0 ) {
-                    vm.diffHour = 0;
-                }
+				}
 
-                return vm.diffHour;
+				return vm.diffMin;
 
-            },
+			},
 
-            days() {
+			hours() {
 
-                let vm     = this;
-                vm.diffDay = Math.trunc( ( vm.date - vm.now ) / 60 / 60 / 24 );
+				let vm      = this;
+				vm.diffHour = Math.trunc( ( vm.date - vm.now ) / 60 / 60 ) % 24;
 
-                if( vm.diffDay < 0 ) {
-                    vm.diffDay = 0;
-                }
+				if( vm.diffHour < 0 ) {
+					vm.diffHour = 0;
+				}
 
-                return vm.diffDay;
-            }
-        }
-    }
+				return vm.diffHour;
+
+			},
+
+			days() {
+
+				let vm     = this;
+				vm.diffDay = Math.trunc( ( vm.date - vm.now ) / 60 / 60 / 24 );
+
+				if( vm.diffDay < 0 ) {
+					vm.diffDay = 0;
+				}
+
+				return vm.diffDay;
+			}
+
+		}
+
+	}
 
 </script>
