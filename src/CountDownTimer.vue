@@ -1,5 +1,5 @@
 <template>
-	<div v-if="loaded === 'true'">
+	<div v-if="loaded === 'true'" class="clock">
 		<span class="icon-clock" v-if="infinite === 'true'">N/A</span>
 		<span class="icon-clock" v-else-if="runTimer === 'false'">Expired</span>
 		<span class="icon-clock" v-else>{{ twoDigits( days ) }} DAY {{ twoDigits( hours ) }}:{{ twoDigits( minutes ) }}:{{ twoDigits( seconds ) }}</span>
