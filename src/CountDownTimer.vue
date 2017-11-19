@@ -1,148 +1,126 @@
 <template>
-	<div v-if="loaded === 'true'" class="clock">
-		<span class="icon-clock" v-if="infinite === 'true'">N/A</span>
-		<span class="icon-clock" v-else-if="runTimer === 'false'">Expired</span>
-		<span class="icon-clock" v-else>{{ twoDigits( days ) }} DAY {{ twoDigits( hours ) }}:{{ twoDigits( minutes ) }}:{{ twoDigits( seconds ) }}</span>
+	<div v-if="loaded === 'true'">
+		<span class="fbm-time icon-clock" v-if="infinite === 'true'">N/A</span>
+		<span class="fbm-time icon-clock" v-else-if="runTimer === 'false'">Expired</span>
+		<span class="fbm-time icon-clock" v-else>{{ days }} {{ dayOrDays( days ) }} {{ hours }}:{{ minutes }}:{{ seconds }}</span>
 	</div>
 </template>
 
 <script>
 
 	export default {
-		props: [ 'deadline', 'timezone' ],
+
+		props: ['deadline'],
 
 		data() {
 			return {
-				// getTime() returns number of milliseconds since given date.
-				// convert milliseconds to seconds.
-				now     : null,
-				date    : null,
-				timer   : null,
-				diffSec : null,
-				diffMin : null,
-				diffHour: null,
-				diffDay : null,
-				runTimer: 'true',
-				infinite: 'false',
-				loaded  : 'false',
-			}
-		},
 
+				infinite: 'false',
+				loaded: 'false',
+				timer: '',
+				runTimer: 'true',
+				days: '',
+				hours: '',
+				minutes: '',
+				seconds: '',
+			};
+		},
 		mounted() {
 
-			let vm   = this;
+			const vm = this;
 
-			let parseDate = Date.parse( vm.deadline );
-
-			if( isNaN( parseDate ) ) {
-
+			if ( vm.deadline ) {
+				vm.initializeClock( vm.deadline );
+			} else {
 				vm.infinite = 'true';
 				vm.loaded = 'true';
-
-			} else {
-
-				vm.date  = Math.trunc( parseDate / 1000 );
-
-				vm.timer = setInterval( () => {
-
-					vm.runTimer = 'true';
-
-					let timeZoneLocale = new Date();
-					vm.now = Math.trunc( timeZoneLocale.getTime() / 1000 );
-
-					if ( vm.timezone ) {
-
-						timeZoneLocale = new Date().toLocaleString( 'en-US', { timeZone: vm.timezone } );
-						vm.now = Math.trunc( ( new Date( timeZoneLocale ) ).getTime() / 1000 );
-					}
-
-					vm.loaded = 'true';
-
-				}, 1000 )
-
 			}
-		},
 
+		},
 		methods: {
 
-			stopTimer: function () {
+			/**
+			 * Converts a UTC time to days, hours, minutes and seconds for countdown.
+			 *
+			 * @param {string} eventDate Date in YYYY-MM-DD HH:MM:SS format in UTC.
+			 * @return {{days, hours, minutes, seconds}}
+			 */
+			getCountdownValues: function( eventDate ) {
 
-				let vm = this;
-				clearInterval( vm.timer );
-				vm.runTimer = 'false';
+				let currentTimeStamp, now, parseDate, timeDifference, convertMilliseconds;
 
+				now = new Date();
+
+				parseDate = function( eDate ) {
+					let eventDateParts = eDate.split( /\D/ ),
+						dateParts = [], date, i;
+
+					for ( i = 0; i <= eventDateParts.length; i++ ) {
+						dateParts[ i ] = parseInt( eventDateParts[ i ], 10 );
+					}
+
+					date = new Date( Date.UTC( dateParts[0], dateParts[1] - 1, dateParts[2], dateParts[3], dateParts[4], dateParts[5] ) );
+					return date.valueOf();
+				};
+
+				currentTimeStamp = ( new Date( Date.UTC ( now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(),
+					now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds(), now.getUTCMilliseconds() ) ) ).valueOf();
+
+				convertMilliseconds = function( ms ) {
+					let d, h, m, s, padNumber;
+					s = Math.floor( ms / 1000 );
+					m = Math.floor( s / 60 );
+					h = Math.floor( m / 60 );
+					d = Math.floor( h / 24 );
+
+					padNumber = function( n ) {
+						return n < 10 ? '0' + String( n ) : n;
+					};
+
+					return {
+						total: ms,
+						days: d,
+						hours: padNumber( h % 24 ),
+						minutes: padNumber( m % 60 ),
+						seconds: padNumber( s % 60 ),
+					};
+				};
+
+				timeDifference = parseDate( eventDate ) - currentTimeStamp;
+				return convertMilliseconds( timeDifference );
 			},
-			twoDigits: function ( value ) {
+			initializeClock: function() {
 
-				if ( value.toString().length <= 1 ) {
-					return '0' + value.toString();
+				const vm = this;
+				vm.timer = setInterval(() => {
+
+					let diff = vm.getCountdownValues( vm.deadline );
+
+					vm.days = diff.days;
+					vm.hours = diff.hours;
+					vm.minutes = diff.minutes;
+					vm.seconds = diff.seconds;
+					vm.loaded = 'true';
+
+					if ( 0 >= diff.total ) {
+						vm.runTimer = 'false';
+						clearInterval( vm.timer );
+					}
+
+				}, 1000 );
+			},
+			dayOrDays: function( number ) {
+
+				if ( 1 < parseInt( number, 10 ) ) {
+					return 'DAYS';
+				} else {
+					return 'DAY';
 				}
+			},
 
-				return value.toString();
-			}
 
 		},
 
-		computed: {
-
-			seconds() {
-
-				let vm     = this;
-				vm.diffSec = Math.trunc( vm.date - vm.now ) % 60;
-
-				if( vm.diffSec < 0 ) {
-
-					vm.diffSec  = 0;
-					vm.stopTimer();
-
-				}
-
-				return vm.diffSec;
-
-			},
-
-			minutes() {
-
-				let vm     = this;
-				vm.diffMin = Math.trunc( ( vm.date - vm.now ) / 60 ) % 60;
-
-				if( vm.diffMin < 0 ) {
-
-					vm.diffMin  = 0;
-
-				}
-
-				return vm.diffMin;
-
-			},
-
-			hours() {
-
-				let vm      = this;
-				vm.diffHour = Math.trunc( ( vm.date - vm.now ) / 60 / 60 ) % 24;
-
-				if( vm.diffHour < 0 ) {
-					vm.diffHour = 0;
-				}
-
-				return vm.diffHour;
-
-			},
-
-			days() {
-
-				let vm     = this;
-				vm.diffDay = Math.trunc( ( vm.date - vm.now ) / 60 / 60 / 24 );
-
-				if( vm.diffDay < 0 ) {
-					vm.diffDay = 0;
-				}
-
-				return vm.diffDay;
-			}
-
-		}
-
-	}
+	};
 
 </script>

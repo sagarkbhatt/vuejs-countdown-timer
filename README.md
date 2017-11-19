@@ -1,8 +1,9 @@
 # VUEJS-COUNTDOWN-TIMER
-### COUNTDOWN TIMER WITH TIMEZONE CONVERSION SUPPORT
+### COUNTDOWN TIMER 
 
 ## EXAMPLE:
 
+INPUT : UTC Date in YYYY-MM-DD HH:MM:SS format
 ```
  
  <countdown-timer deadline="August 28, 2018 01:00:00" timezone=""></countdown-timer>

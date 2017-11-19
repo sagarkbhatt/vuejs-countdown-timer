@@ -6,7 +6,7 @@ Vue.component( 'countdown-timer', CountDownTimer );
 
 const App = Vue.extend( {
 
-	template: '<countdown-timer deadline="August 28, 2018 01:00:00" timezone=""></countdown-timer>'
+	template: '<countdown-timer deadline="2018-08-21 12:00:00" ></countdown-timer>'
 
 } );
 
