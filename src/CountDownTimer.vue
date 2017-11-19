@@ -1,8 +1,8 @@
 <template>
-	<div v-if="loaded === 'true'">
-		<span class="fbm-time icon-clock" v-if="infinite === 'true'">N/A</span>
-		<span class="fbm-time icon-clock" v-else-if="runTimer === 'false'">Expired</span>
-		<span class="fbm-time icon-clock" v-else>{{ days }} {{ dayOrDays( days ) }} {{ hours }}:{{ minutes }}:{{ seconds }}</span>
+	<div v-if="loaded === 'true'" class="clock">
+		<span v-if="infinite === 'true'">N/A</span>
+		<span v-else-if="runTimer === 'false'">Expired</span>
+		<span v-else>{{ days }} {{ dayOrDays( days ) }} {{ hours }}:{{ minutes }}:{{ seconds }}</span>
 	</div>
 </template>
 
