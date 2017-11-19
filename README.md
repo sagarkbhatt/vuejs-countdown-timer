@@ -6,7 +6,7 @@
 INPUT : UTC Date in YYYY-MM-DD HH:MM:SS format
 ```
  
- <countdown-timer deadline="August 28, 2018 01:00:00" timezone=""></countdown-timer>
+ <countdown-timer deadline="2018-08-21 12:00:00" ></countdown-timer>
 ```
 ## [DEMO](https://sagarkbhatt.github.io/vuejs-countdown-timer/)
 
