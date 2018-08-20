@@ -37,6 +37,9 @@
 			}
 
 		},
+		beforeDestroy() {
+			this.destroy();
+		},
 		methods: {
 
 			/**
@@ -89,9 +92,11 @@
 				timeDifference = parseDate( eventDate ) - currentTimeStamp;
 				return convertMilliseconds( timeDifference );
 			},
-			initializeClock: function() {
-
+			initializeClock: function() {			
 				const vm = this;
+				
+				vm.destroy();
+				
 				vm.timer = setInterval(() => {
 
 					let diff = vm.getCountdownValues( vm.deadline );
@@ -104,10 +109,17 @@
 
 					if ( 0 >= diff.total ) {
 						vm.runTimer = 'false';
-						clearInterval( vm.timer );
+						this.destroy();
 					}
 
 				}, 1000 );
+			},
+			destroy() {
+				if(this.timer) {
+					clearInterval(this.timer);
+					this.timer = undefined;
+				}
+				vm.runTimer = 'false';
 			},
 			dayOrDays: function( number ) {
 
