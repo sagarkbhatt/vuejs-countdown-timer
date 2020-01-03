@@ -39,7 +39,7 @@
     "vue-template-compiler": "^2.3.3",
     "webpack": "^3.3.0",
     "webpack-cleanup-plugin": "^0.5.1",
-    "webpack-dev-server": "^2.6.1",
+    "webpack-dev-server": "^3.1.11",
     "fs-extra": "^3.0.1"
   },
   "dependencies": {
